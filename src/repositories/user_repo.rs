@@ -21,10 +21,10 @@ impl UserRepository {
         Ok(_users)
     }
 
-    pub fn get_user(&self, _id: Uuid) -> Result<User, diesel::result::Error> {
+    pub fn get_user(&self, uuid: Uuid) -> Result<User, diesel::result::Error> {
         use crate::database::schema::users::dsl::*;
         let mut conn = self.pool.get().expect("Failed to get connection");
-        let user = users.find(_id).first(&mut conn)?;
+        let user = users.find(uuid).first(&mut conn)?;
         Ok(user)
     }
 

@@ -75,8 +75,8 @@ pub async fn get_user(
     service: &State<UserRepository>,
     _auth: AuthToken,
 ) -> Result<Json<UserResponse>, Status> {
-    let _id = Uuid::parse_str(id).map_err(|_| Status::BadRequest)?;
-    match service.get_user(_id) {
+    let uuid = Uuid::parse_str(id).map_err(|_| Status::BadRequest)?;
+    match service.get_user(uuid) {
         Ok(user) => Ok(Json(UserResponse::from_user(user))),
         Err(diesel::result::Error::NotFound) => Err(Status::BadRequest),
         Err(_) => Err(Status::InternalServerError),
