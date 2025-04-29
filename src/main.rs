@@ -3,6 +3,7 @@ use repositories::user_repo::UserRepository;
 #[macro_use]
 extern crate rocket;
 
+mod auth;
 mod database;
 mod repositories;
 mod services;
