@@ -86,3 +86,8 @@ pub async fn create_user(
         Err(_) => Err(Status::InternalServerError),
     }
 }
+
+#[delete("/users/<id>")]
+pub async fn delete_user(id: &str, service: &State<UserRepository>) -> Result<Status, Status> {
+    Ok(Status::NoContent)
+}
