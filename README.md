@@ -1,5 +1,5 @@
 # user_register_api
-A simple RESTful API built with Rust, utilizing the Rocket framework and Diesel ORM for PostgreSQL database interactions. 🦀
+A simple RESTful API built with Rust🦀, utilizing the Rocket framework and Diesel ORM for PostgreSQL database interactions.
 
 ## Features
 
