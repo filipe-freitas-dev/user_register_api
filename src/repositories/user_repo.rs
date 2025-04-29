@@ -11,7 +11,7 @@ impl UserRepository {
         Self { pool }
     }
 
-    pub fn get_users(&self) -> Result<Vec<User>, Box<dyn std::error::Error>> {
+    pub fn get_users(&self) -> Result<Vec<User>, diesel::result::Error> {
         use crate::database::schema::users::dsl::*;
         let mut conn = self.pool.get().expect("Failed to get connection");
         let _users = users.load::<User>(&mut conn)?;
