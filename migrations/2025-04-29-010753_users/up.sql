@@ -18,7 +18,6 @@ CREATE TABLE admins (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
--- Add trigger function to automatically update the updated_at timestamp
 CREATE OR REPLACE FUNCTION update_modified_column()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -27,7 +26,6 @@ BEGIN
 END;
 $$ language 'plpgsql';
 
--- Add triggers to both tables
 CREATE TRIGGER update_users_modtime
     BEFORE UPDATE ON users
     FOR EACH ROW
