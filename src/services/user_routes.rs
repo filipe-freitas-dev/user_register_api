@@ -5,7 +5,7 @@ use uuid::Uuid;
 use crate::{database::user_models::User, repositories::user_repo::UserRepository};
 
 pub fn routes() -> Vec<rocket::Route> {
-    routes![get_users]
+    routes![get_users, get_user]
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -32,6 +32,19 @@ pub async fn get_users(service: &State<UserRepository>) -> Result<Json<Vec<UserR
         Ok(users) => Ok(Json(
             users.into_iter().map(UserResponse::from_user).collect(),
         )),
+        Err(diesel::result::Error::NotFound) => Err(Status::BadRequest),
+        Err(_) => Err(Status::InternalServerError),
+    }
+}
+
+#[get("/users/<id>")]
+pub async fn get_user(
+    id: &str,
+    service: &State<UserRepository>,
+) -> Result<Json<UserResponse>, Status> {
+    let _id = Uuid::parse_str(id).map_err(|_| Status::BadRequest)?;
+    match service.get_user(_id) {
+        Ok(user) => Ok(Json(UserResponse::from_user(user))),
         Err(diesel::result::Error::NotFound) => Err(Status::BadRequest),
         Err(_) => Err(Status::InternalServerError),
     }
