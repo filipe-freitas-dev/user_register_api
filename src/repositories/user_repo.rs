@@ -60,23 +60,25 @@ impl UserRepository {
         &self,
         uuid: Uuid,
         user: PartialUpdateUser,
-    ) -> Result<User, diesel::result::Error> {
+    ) -> Result<(), diesel::result::Error> {
         use crate::database::schema::users::dsl::*;
         let mut conn = self.pool.get().expect("Failed to get connection");
         diesel::update(users.find(uuid))
             .set(&user)
-            .get_result(&mut conn)
+            .get_result::<User>(&mut conn)?;
+        Ok(())
     }
 
     pub fn change_password(
         &self,
         uuid: Uuid,
         new_password: &str,
-    ) -> Result<User, diesel::result::Error> {
+    ) -> Result<(), diesel::result::Error> {
         use crate::database::schema::users::dsl::*;
         let mut conn = self.pool.get().expect("Failed to get connection");
         diesel::update(users.find(uuid))
             .set(password.eq(new_password))
-            .get_result(&mut conn)
+            .get_result::<User>(&mut conn)?;
+        Ok(())
     }
 }
