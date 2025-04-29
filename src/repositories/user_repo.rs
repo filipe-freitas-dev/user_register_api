@@ -36,4 +36,11 @@ impl UserRepository {
             .get_result(&mut conn)?;
         Ok(user)
     }
+
+    pub fn get_by_email(&self, _email: &str) -> Result<User, diesel::result::Error> {
+        use crate::database::schema::users::dsl::*;
+        let mut conn = self.pool.get().expect("Failed to get connection");
+        let user = users.filter(email.eq(_email)).first(&mut conn)?;
+        Ok(user)
+    }
 }

@@ -17,4 +17,5 @@ async fn rocket() -> _ {
     rocket::build()
         .manage(user_repo)
         .mount("/", services::user_routes::routes())
+        .mount("/", services::auth_routes::routes())
 }

@@ -3,12 +3,13 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use crate::{
+    auth::AuthToken,
     database::user_models::{NewUser, User},
     repositories::user_repo::UserRepository,
 };
 
 pub fn routes() -> Vec<rocket::Route> {
-    routes![get_users, get_user, create_user]
+    routes![get_users, get_user, create_user, delete_user]
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -40,7 +41,10 @@ impl UserIdResponse {
 }
 
 #[get("/users")]
-pub async fn get_users(service: &State<UserRepository>) -> Result<Json<Vec<UserResponse>>, Status> {
+pub async fn get_users(
+    service: &State<UserRepository>,
+    _auth: AuthToken,
+) -> Result<Json<Vec<UserResponse>>, Status> {
     let users = service.get_users();
     match users {
         Ok(users) => Ok(Json(
@@ -55,6 +59,7 @@ pub async fn get_users(service: &State<UserRepository>) -> Result<Json<Vec<UserR
 pub async fn get_user(
     id: &str,
     service: &State<UserRepository>,
+    _auth: AuthToken,
 ) -> Result<Json<UserResponse>, Status> {
     let _id = Uuid::parse_str(id).map_err(|_| Status::BadRequest)?;
     match service.get_user(_id) {
@@ -88,6 +93,10 @@ pub async fn create_user(
 }
 
 #[delete("/users/<id>")]
-pub async fn delete_user(id: &str, service: &State<UserRepository>) -> Result<Status, Status> {
+pub async fn delete_user(
+    id: &str,
+    service: &State<UserRepository>,
+    auth: AuthToken,
+) -> Result<Status, Status> {
     Ok(Status::NoContent)
 }
