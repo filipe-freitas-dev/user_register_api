@@ -59,6 +59,7 @@ A simple RESTful API built with Rust, utilizing the Rocket framework and Diesel 
 | PUT    | `/users/{id}`  | Update user by ID          |
 | DELETE | `/users/{id}`  | Delete user by ID          |
 | POST   | `/admins`      | Create admin user          |
+| POST   | `/login`       | Athenticate a user         |
 
 
 ## Technologies Used
