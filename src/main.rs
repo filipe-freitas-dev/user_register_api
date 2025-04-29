@@ -1,14 +1,19 @@
+use repositories::user_repo::UserRepository;
+
 #[macro_use]
 extern crate rocket;
 
 mod database;
-
-#[get("/")]
-async fn index() -> &'static str {
-    "hello world"
-}
+mod repositories;
+mod services;
 
 #[launch]
 async fn rocket() -> _ {
-    rocket::build().mount("/", routes![index])
+    dotenvy::dotenv().ok();
+    let pool = database::establish_connection_pool();
+
+    let user_repo = UserRepository::new(pool);
+    rocket::build()
+        .manage(user_repo)
+        .mount("/", services::user_routes::routes())
 }
