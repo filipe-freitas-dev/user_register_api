@@ -43,4 +43,16 @@ impl UserRepository {
         let user = users.filter(email.eq(_email)).first(&mut conn)?;
         Ok(user)
     }
+
+    pub fn delete_user(&self, uuid: Uuid) -> Result<(), diesel::result::Error> {
+        use crate::database::schema::users::dsl::*;
+        let mut conn = self.pool.get().expect("Failed to get connection");
+        let deleted_users = diesel::delete(users.find(uuid)).execute(&mut conn)?;
+
+        if deleted_users == 0 {
+            return Err(diesel::result::Error::NotFound);
+        }
+
+        Ok(())
+    }
 }

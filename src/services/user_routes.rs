@@ -98,5 +98,14 @@ pub async fn delete_user(
     service: &State<UserRepository>,
     auth: AuthToken,
 ) -> Result<Status, Status> {
-    Ok(Status::NoContent)
+    let user_id = auth.extract_user_id().unwrap();
+    if user_id != id {
+        return Err(Status::Unauthorized);
+    }
+    let uuid = Uuid::parse_str(id).map_err(|_| Status::BadRequest)?;
+    match service.delete_user(uuid) {
+        Ok(_) => Ok(Status::NoContent),
+        Err(diesel::result::Error::NotFound) => Err(Status::BadRequest),
+        Err(_) => Err(Status::InternalServerError),
+    }
 }
