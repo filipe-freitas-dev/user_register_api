@@ -9,7 +9,14 @@ use crate::{
 };
 
 pub fn routes() -> Vec<rocket::Route> {
-    routes![get_users, get_user, create_user, delete_user, update_user]
+    routes![
+        get_users,
+        get_user,
+        create_user,
+        delete_user,
+        update_user,
+        change_password
+    ]
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -38,6 +45,13 @@ impl UserIdResponse {
     pub fn from_user(user: User) -> UserIdResponse {
         UserIdResponse { id: user.id }
     }
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ChangePasswordProps {
+    pub old_password: String,
+    pub new_password: String,
+    pub confirm_password: String,
 }
 
 #[get("/users")]
@@ -141,6 +155,44 @@ pub async fn update_user(
     }
     let uuid = Uuid::parse_str(id).map_err(|_| Status::BadRequest)?;
     match service.update_user(uuid, user) {
+        Ok(_) => Ok(Status::NoContent),
+        Err(diesel::result::Error::NotFound) => Err(Status::BadRequest),
+        Err(_) => Err(Status::InternalServerError),
+    }
+}
+
+#[put("/change-password", format = "json", data = "<user>")]
+pub async fn change_password(
+    service: &State<UserRepository>,
+    user: Json<ChangePasswordProps>,
+    auth: AuthToken,
+) -> Result<Status, Status> {
+    let user_id = auth.extract_user_id().unwrap();
+    let uuid = Uuid::parse_str(user_id).map_err(|_| Status::BadRequest)?;
+    let db_user = service.get_user(uuid).map_err(|_| Status::BadRequest)?;
+
+    let user = user.into_inner();
+    if user.old_password.is_empty() {
+        return Err(Status::BadRequest);
+    }
+
+    let is_valid = bcrypt::verify(&user.old_password, &db_user.password).unwrap();
+    if !is_valid {
+        return Err(Status::Unauthorized);
+    }
+
+    if user.new_password.is_empty() {
+        return Err(Status::BadRequest);
+    }
+    if user.new_password.len() < 8 {
+        return Err(Status::BadRequest);
+    }
+
+    if user.new_password != user.confirm_password {
+        return Err(Status::BadRequest);
+    }
+
+    match service.change_password(uuid, &user.new_password) {
         Ok(_) => Ok(Status::NoContent),
         Err(diesel::result::Error::NotFound) => Err(Status::BadRequest),
         Err(_) => Err(Status::InternalServerError),

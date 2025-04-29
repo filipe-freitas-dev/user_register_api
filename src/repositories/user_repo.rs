@@ -67,4 +67,16 @@ impl UserRepository {
             .set(&user)
             .get_result(&mut conn)
     }
+
+    pub fn change_password(
+        &self,
+        uuid: Uuid,
+        new_password: &str,
+    ) -> Result<User, diesel::result::Error> {
+        use crate::database::schema::users::dsl::*;
+        let mut conn = self.pool.get().expect("Failed to get connection");
+        diesel::update(users.find(uuid))
+            .set(password.eq(new_password))
+            .get_result(&mut conn)
+    }
 }
