@@ -41,7 +41,7 @@ impl<'r> FromRequest<'r> for AuthToken {
         };
 
         let token = token
-            .strip_prefix("Baerer ")
+            .strip_prefix("Bearer ")
             .ok_or(Self::Error::InvalidToken)
             .expect("Invalid token format");
 
