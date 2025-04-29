@@ -1,6 +1,6 @@
 use crate::database::{
     DbPool,
-    user_models::{NewUser, PartialUpdateUser, User},
+    user_models::{Admin, NewAdmin, NewUser, PartialUpdateUser, User},
 };
 use diesel::prelude::*;
 use uuid::Uuid;
@@ -79,6 +79,30 @@ impl UserRepository {
         diesel::update(users.find(uuid))
             .set(password.eq(new_password))
             .get_result::<User>(&mut conn)?;
+        Ok(())
+    }
+
+    pub fn create_admin(&self, admin: NewAdmin) -> Result<(), diesel::result::Error> {
+        use crate::database::schema::admins::dsl::*;
+        let mut conn = self.pool.get().expect("Failed to get connection");
+        diesel::insert_into(admins)
+            .values(&admin)
+            .get_result::<Admin>(&mut conn)?;
+        Ok(())
+    }
+
+    pub fn get_admin(&self, _user_id: Uuid) -> Result<(), diesel::result::Error> {
+        use crate::database::schema::admins::dsl::*;
+        let mut conn = self.pool.get().expect("Failed to get connection");
+        let admin_from_db = admins
+            .filter(user_id.eq(_user_id))
+            .first::<Admin>(&mut conn)
+            .optional()?;
+
+        if admin_from_db.is_none() {
+            return Err(diesel::result::Error::NotFound);
+        }
+
         Ok(())
     }
 }

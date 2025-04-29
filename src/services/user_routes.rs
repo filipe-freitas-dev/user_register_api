@@ -4,7 +4,7 @@ use uuid::Uuid;
 
 use crate::{
     auth::AuthToken,
-    database::user_models::{NewUser, PartialUpdateUser, User},
+    database::user_models::{NewAdmin, NewUser, PartialUpdateUser, User},
     repositories::user_repo::UserRepository,
 };
 
@@ -15,7 +15,8 @@ pub fn routes() -> Vec<rocket::Route> {
         create_user,
         delete_user,
         update_user,
-        change_password
+        change_password,
+        create_admin
     ]
 }
 
@@ -195,6 +196,29 @@ pub async fn change_password(
     match service.change_password(uuid, &user.new_password) {
         Ok(_) => Ok(Status::NoContent),
         Err(diesel::result::Error::NotFound) => Err(Status::BadRequest),
+        Err(_) => Err(Status::InternalServerError),
+    }
+}
+
+#[post("/admins", format = "json", data = "<admin>")]
+pub async fn create_admin(
+    admin: Json<NewAdmin>,
+    service: &State<UserRepository>,
+    auth: AuthToken,
+) -> Result<Status, Status> {
+    let _user_id = auth.extract_user_id().unwrap();
+    let _user_id = Uuid::parse_str(_user_id).map_err(|_| Status::BadRequest)?;
+
+    match service.get_admin(_user_id) {
+        Ok(_) => {}
+        Err(diesel::result::Error::NotFound) => return Err(Status::Unauthorized),
+        Err(_) => return Err(Status::InternalServerError),
+    }
+
+    let admin = admin.into_inner();
+    match service.create_admin(admin) {
+        Ok(_) => Ok(Status::Created),
+        Err(diesel::result::Error::DatabaseError(_, _)) => Err(Status::BadRequest),
         Err(_) => Err(Status::InternalServerError),
     }
 }
