@@ -1,4 +1,7 @@
-use crate::database::{DbPool, user_models::User};
+use crate::database::{
+    DbPool,
+    user_models::{NewUser, User},
+};
 use diesel::prelude::*;
 use uuid::Uuid;
 
@@ -22,6 +25,15 @@ impl UserRepository {
         use crate::database::schema::users::dsl::*;
         let mut conn = self.pool.get().expect("Failed to get connection");
         let user = users.find(_id).first(&mut conn)?;
+        Ok(user)
+    }
+
+    pub fn create_user(&self, user: NewUser) -> Result<User, diesel::result::Error> {
+        use crate::database::schema::users::dsl::*;
+        let mut conn = self.pool.get().expect("Failed to get connection");
+        let user = diesel::insert_into(users)
+            .values(&user)
+            .get_result(&mut conn)?;
         Ok(user)
     }
 }
