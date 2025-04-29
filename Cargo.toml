@@ -12,4 +12,4 @@ uuid = { version = "1", features = ["serde"] }
 rocket = {version = "0.5", features = ["json"]}
 bcrypt = "0.17"
 jsonwebtoken = "9"
-chrono = { version = "0.4", features = ["serde"] }
+chrono = { version = "0.4.41", features = ["serde"] }
