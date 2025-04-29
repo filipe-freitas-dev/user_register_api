@@ -1,6 +1,6 @@
 use crate::database::{
     DbPool,
-    user_models::{NewUser, User},
+    user_models::{NewUser, PartialUpdateUser, User},
 };
 use diesel::prelude::*;
 use uuid::Uuid;
@@ -54,5 +54,17 @@ impl UserRepository {
         }
 
         Ok(())
+    }
+
+    pub fn update_user(
+        &self,
+        uuid: Uuid,
+        user: PartialUpdateUser,
+    ) -> Result<User, diesel::result::Error> {
+        use crate::database::schema::users::dsl::*;
+        let mut conn = self.pool.get().expect("Failed to get connection");
+        diesel::update(users.find(uuid))
+            .set(&user)
+            .get_result(&mut conn)
     }
 }

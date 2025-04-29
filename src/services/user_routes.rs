@@ -4,12 +4,12 @@ use uuid::Uuid;
 
 use crate::{
     auth::AuthToken,
-    database::user_models::{NewUser, User},
+    database::user_models::{NewUser, PartialUpdateUser, User},
     repositories::user_repo::UserRepository,
 };
 
 pub fn routes() -> Vec<rocket::Route> {
-    routes![get_users, get_user, create_user, delete_user]
+    routes![get_users, get_user, create_user, delete_user, update_user]
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -82,6 +82,13 @@ pub async fn create_user(
         password: hashed_password,
     };
 
+    if user.password.is_empty() {
+        return Err(Status::BadRequest);
+    }
+    if user.password.len() < 8 {
+        return Err(Status::BadRequest);
+    }
+
     match service.create_user(user) {
         Ok(user_created) => {
             let user_created = UserIdResponse::from_user(user_created);
@@ -104,6 +111,36 @@ pub async fn delete_user(
     }
     let uuid = Uuid::parse_str(id).map_err(|_| Status::BadRequest)?;
     match service.delete_user(uuid) {
+        Ok(_) => Ok(Status::NoContent),
+        Err(diesel::result::Error::NotFound) => Err(Status::BadRequest),
+        Err(_) => Err(Status::InternalServerError),
+    }
+}
+
+#[put("/users/<id>", format = "json", data = "<user>")]
+pub async fn update_user(
+    id: &str,
+    user: Json<PartialUpdateUser>,
+    service: &State<UserRepository>,
+    auth: AuthToken,
+) -> Result<Status, Status> {
+    let mut user = user.into_inner();
+    if user.email.is_none() && user.name.is_none() {
+        return Err(Status::BadRequest);
+    }
+
+    if user.password.is_some() {
+        return Err(Status::BadRequest);
+    }
+
+    user.password = None;
+
+    let user_id = auth.extract_user_id().unwrap();
+    if user_id != id {
+        return Err(Status::Unauthorized);
+    }
+    let uuid = Uuid::parse_str(id).map_err(|_| Status::BadRequest)?;
+    match service.update_user(uuid, user) {
         Ok(_) => Ok(Status::NoContent),
         Err(diesel::result::Error::NotFound) => Err(Status::BadRequest),
         Err(_) => Err(Status::InternalServerError),
