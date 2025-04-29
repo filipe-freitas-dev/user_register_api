@@ -30,6 +30,7 @@ A simple RESTful API built with Rust, utilizing the Rocket framework and Diesel 
    Create a `.env` file in the root directory and add your database URL:
    ```env
    DATABASE_URL=postgres://username:password@localhost/database_name
+   JWT_SECRET=yoursupersecret
    ```
 
 3. **Install Diesel CLI (if not already installed):**
@@ -50,13 +51,15 @@ A simple RESTful API built with Rust, utilizing the Rocket framework and Diesel 
 
 ## API Endpoints
 
-| Method | Endpoint       | Description          |
-|--------|----------------|----------------------|
-| POST   | `/users`       | Create a new user    |
-| GET    | `/users`       | Retrieve all users   |
-| GET    | `/users/{id}`  | Retrieve user by ID  |
-| PUT    | `/users/{id}`  | Update user by ID    |
-| DELETE | `/users/{id}`  | Delete user by ID    |
+| Method | Endpoint       | Description                |
+|--------|----------------|----------------------------|
+| POST   | `/users`       | Create a new user          |
+| GET    | `/users`       | Retrieve all users         |
+| GET    | `/users/{id}`  | Retrieve user by ID        |
+| PUT    | `/users/{id}`  | Update user by ID          |
+| DELETE | `/users/{id}`  | Delete user by ID          |
+| POST   | `/admins`      | Create admin user          |
+
 
 ## Technologies Used
 
