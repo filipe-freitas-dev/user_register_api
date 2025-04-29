@@ -1,4 +1,3 @@
-use bcrypt::bcrypt;
 use rocket::{State, http::Status, serde::json::Json};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;

@@ -4,6 +4,8 @@ diesel::table! {
     admins (id) {
         id -> Uuid,
         user_id -> Uuid,
+        created_at -> Nullable<Timestamptz>,
+        updated_at -> Nullable<Timestamptz>,
     }
 }
 
@@ -16,6 +18,8 @@ diesel::table! {
         email -> Varchar,
         #[max_length = 255]
         password -> Varchar,
+        created_at -> Nullable<Timestamptz>,
+        updated_at -> Nullable<Timestamptz>,
     }
 }
 
