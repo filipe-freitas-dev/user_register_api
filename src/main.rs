@@ -19,10 +19,16 @@ async fn rocket() -> _ {
         .allowed_origins(AllowedOrigins::all())
         .max_age(Some(3600))
         .allowed_methods(
-            vec![Method::Get, Method::Post, Method::Patch]
-                .into_iter()
-                .map(From::from)
-                .collect(),
+            vec![
+                Method::Get,
+                Method::Post,
+                Method::Patch,
+                Method::Delete,
+                Method::Put,
+            ]
+            .into_iter()
+            .map(From::from)
+            .collect(),
         )
         .allow_credentials(true);
 

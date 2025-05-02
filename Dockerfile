@@ -7,7 +7,10 @@ RUN apt-get update && apt-get install -y \
     libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
-COPY . .
+COPY . /app
+
+WORKDIR /app
+
 RUN cargo install diesel_cli --no-default-features --features postgres
 RUN cargo build --locked --release
 RUN cp ./target/release/$APP_NAME /bin/server
